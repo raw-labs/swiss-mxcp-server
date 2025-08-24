@@ -8,4 +8,4 @@ sql_tools:
 profiles:
   prod:
     duckdb:
-      path: data/mxcp.duckdb
+      path: /app/data/mxcp.duckdb

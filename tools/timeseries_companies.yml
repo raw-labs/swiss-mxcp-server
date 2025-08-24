@@ -9,25 +9,28 @@ tool:
     description: Time interval (month or year)
   - name: legal_form
     type: string
+    default: null
     description: Filter by legal form
   - name: canton
     type: string
+    default: null
     description: Filter by canton
   - name: industry_code
     type: string
+    default: null
     description: Filter by industry code
   - name: registration_date_from
     type: string
+    default: null
     description: Registration date from
   - name: registration_date_to
     type: string
+    default: null
     description: Registration date to
   - name: page_size
     type: integer
     default: 100
     description: Results per page
-  return:
-    type: array
   source:
     file: ../sql/timeseries_companies.sql
   enabled: true

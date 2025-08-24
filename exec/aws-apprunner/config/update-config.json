@@ -1,0 +1,10 @@
+{
+  "HealthCheckConfiguration": {
+    "Protocol": "HTTP",
+    "Path": "/mcp",
+    "Interval": 10,
+    "Timeout": 5,
+    "HealthyThreshold": 1,
+    "UnhealthyThreshold": 5
+  }
+}

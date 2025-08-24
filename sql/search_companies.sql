@@ -1,42 +1,18 @@
 SELECT *
-FROM {{ ref('swiss_companies') }}
+FROM swiss_companies
 WHERE 1=1
-{% if company_name %}
-    AND CompanyName = '{{ company_name }}'
-{% endif %}
-{% if company_name_like %}
-    AND LOWER(CompanyName) LIKE LOWER('%{{ company_name_like }}%')
-{% endif %}
-{% if uid %}
-    AND UID = '{{ uid }}'
-{% endif %}
-{% if legal_form %}
-    AND LegalForm = '{{ legal_form }}'
-{% endif %}
-{% if canton %}
-    AND Canton = '{{ canton }}'
-{% endif %}
-{% if industry_code %}
-    AND IndustryCode = '{{ industry_code }}'
-{% endif %}
-{% if min_capital %}
-    AND ShareCapitalCHF >= {{ min_capital }}
-{% endif %}
-{% if max_capital %}
-    AND ShareCapitalCHF <= {{ max_capital }}
-{% endif %}
-{% if min_employees %}
-    AND Employees >= {{ min_employees }}
-{% endif %}
-{% if max_employees %}
-    AND Employees <= {{ max_employees }}
-{% endif %}
-{% if registration_date_from %}
-    AND RegistrationDate >= '{{ registration_date_from }}'
-{% endif %}
-{% if registration_date_to %}
-    AND RegistrationDate <= '{{ registration_date_to }}'
-{% endif %}
+    AND ($company_name IS NULL OR CompanyName = $company_name)
+    AND ($company_name_like IS NULL OR LOWER(CompanyName) LIKE LOWER('%' || $company_name_like || '%'))
+    AND ($uid IS NULL OR UID = $uid)
+    AND ($legal_form IS NULL OR LegalForm = $legal_form)
+    AND ($canton IS NULL OR Canton = $canton)
+    AND ($industry_code IS NULL OR IndustryCode = $industry_code)
+    AND ($min_capital IS NULL OR ShareCapitalCHF >= $min_capital)
+    AND ($max_capital IS NULL OR ShareCapitalCHF <= $max_capital)
+    AND ($min_employees IS NULL OR Employees >= $min_employees)
+    AND ($max_employees IS NULL OR Employees <= $max_employees)
+    AND ($registration_date_from IS NULL OR RegistrationDate >= $registration_date_from)
+    AND ($registration_date_to IS NULL OR RegistrationDate <= $registration_date_to)
 ORDER BY RegistrationDate DESC
-LIMIT {{ page_size | default(20) }}
-OFFSET ({{ page | default(1) }} - 1) * {{ page_size | default(20) }}
+LIMIT COALESCE($page_size, 20)
+OFFSET (COALESCE($page, 1) - 1) * COALESCE($page_size, 20)

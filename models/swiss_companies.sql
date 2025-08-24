@@ -1,10 +1,5 @@
 {{ config(
-    materialized='table',
-    post_hook=[
-        "CREATE INDEX IF NOT EXISTS idx_canton ON {{ this }} (Canton)",
-        "CREATE INDEX IF NOT EXISTS idx_legal_form ON {{ this }} (LegalForm)",
-        "CREATE INDEX IF NOT EXISTS idx_registration_date ON {{ this }} (RegistrationDate)"
-    ]
+    materialized='view'
 ) }}
 
 select

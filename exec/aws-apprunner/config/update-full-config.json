@@ -1,5 +1,4 @@
 {
-  "ServiceName": "swiss-mxcp-server",
   "SourceConfiguration": {
     "ImageRepository": {
       "ImageIdentifier": "${ECR_IMAGE_URI}",
@@ -10,12 +9,11 @@
         }
       },
       "ImageRepositoryType": "ECR"
-    },
-    "AutoDeploymentsEnabled": false
+    }
   },
   "HealthCheckConfiguration": {
     "Protocol": "HTTP",
-    "Path": "/mcp",
+    "Path": "/health",
     "Interval": 10,
     "Timeout": 5,
     "HealthyThreshold": 1,

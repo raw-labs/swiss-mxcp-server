@@ -1,0 +1,82 @@
+mxcp: 1
+suite: edge_cases
+description: Edge case testing for Swiss business registry tools
+model: gpt-4.1
+tests:
+  - name: no_results_search
+    description: Test handling of searches with no results
+    prompt: "Find companies with exactly 999999999 CHF capital"
+    assertions:
+      must_call:
+        - tool: search_companies
+          args:
+            min_capital: 999999999
+            max_capital: 999999999
+      answer_contains:
+        - "no"
+        - "found"
+        # Should gracefully handle empty results
+
+  - name: comprehensive_filter_search
+    description: Test complex multi-filter search
+    prompt: "Find AG companies in Zürich with over 100,000 CHF capital, more than 50 employees, in the technology industry, registered after 2020"
+    assertions:
+      must_call:
+        - tool: search_companies
+          args:
+            legal_form: "AG"
+            canton: "Zürich"
+            min_capital: 100000
+            min_employees: 50
+            registration_date_from: "2020-01-01"
+      answer_contains:
+        - "AG"
+        - "Zürich"
+        - "technology"
+
+  - name: pagination_test
+    description: Test pagination functionality
+    prompt: "Show me the first 5 companies, then show me the next 5 companies"
+    assertions:
+      must_call:
+        - tool: search_companies
+          args:
+            page: 1
+            page_size: 5
+        - tool: search_companies
+          args:
+            page: 2
+            page_size: 5
+      answer_contains:
+        - "first"
+        - "next"
+        - "5"
+
+  - name: invalid_canton_graceful
+    description: Test graceful handling of potentially invalid input
+    prompt: "Find companies in the canton of 'InvalidCanton'"
+    assertions:
+      must_call:
+        - tool: search_companies
+          args:
+            canton: "InvalidCanton"
+      answer_contains:
+        - "no"
+        # Should handle gracefully
+
+  - name: multiple_aggregations
+    description: Test multiple aggregation calls for comparison
+    prompt: "Compare the distribution of companies by canton vs by legal form"
+    assertions:
+      must_call:
+        - tool: aggregate_companies
+          args:
+            group_by: "Canton"
+        - tool: aggregate_companies
+          args:
+            group_by: "LegalForm"
+      answer_contains:
+        - "distribution"
+        - "compare"
+        - "canton"
+        - "legal form"

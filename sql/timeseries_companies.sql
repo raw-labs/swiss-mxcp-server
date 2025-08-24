@@ -1,35 +1,26 @@
 WITH filtered AS (
     SELECT *
-    FROM {{ ref('swiss_companies') }}
+    FROM swiss_companies
     WHERE 1=1
-    {% if legal_form %}
-        AND LegalForm = '{{ legal_form }}'
-    {% endif %}
-    {% if canton %}
-        AND Canton = '{{ canton }}'
-    {% endif %}
-    {% if industry_code %}
-        AND IndustryCode = '{{ industry_code }}'
-    {% endif %}
-    {% if registration_date_from %}
-        AND RegistrationDate >= '{{ registration_date_from }}'
-    {% endif %}
-    {% if registration_date_to %}
-        AND RegistrationDate <= '{{ registration_date_to }}'
-    {% endif %}
+        AND ($legal_form IS NULL OR LegalForm = $legal_form)
+        AND ($canton IS NULL OR Canton = $canton)
+        AND ($industry_code IS NULL OR IndustryCode = $industry_code)
+        AND ($registration_date_from IS NULL OR RegistrationDate >= $registration_date_from)
+        AND ($registration_date_to IS NULL OR RegistrationDate <= $registration_date_to)
 )
 SELECT 
-    {% if interval == 'year' %}
-        EXTRACT(YEAR FROM RegistrationDate) as period,
-    {% elif interval == 'month' %}
-        DATE_TRUNC('month', RegistrationDate) as period,
-    {% else %}
-        DATE_TRUNC('month', RegistrationDate) as period,
-    {% endif %}
+    CASE 
+        WHEN COALESCE($interval, 'month') = 'year' THEN CAST(EXTRACT(YEAR FROM RegistrationDate) AS TEXT)
+        ELSE CAST(DATE_TRUNC('month', RegistrationDate) AS TEXT)
+    END as period,
     COUNT(*) as count,
     SUM(ShareCapitalCHF) as total_capital,
     SUM(Employees) as total_employees
 FROM filtered
-GROUP BY period
+GROUP BY 
+    CASE 
+        WHEN COALESCE($interval, 'month') = 'year' THEN CAST(EXTRACT(YEAR FROM RegistrationDate) AS TEXT)
+        ELSE CAST(DATE_TRUNC('month', RegistrationDate) AS TEXT)
+    END
 ORDER BY period DESC
-LIMIT {{ page_size | default(100) }}
+LIMIT COALESCE($page_size, 100)

@@ -1,0 +1,55 @@
+mxcp: 1
+suite: basic_swiss_registry
+description: Basic tests for Swiss business registry tools
+model: gpt-4.1
+tests:
+  - name: search_by_canton
+    description: Test searching companies by Swiss canton
+    prompt: "Find all companies in the canton of Zürich"
+    assertions:
+      must_call:
+        - tool: search_companies
+          args: 
+            canton: "Zürich"
+      answer_contains:
+        - "Zürich"
+        - "companies"
+
+  - name: get_legal_forms
+    description: Test getting available legal forms
+    prompt: "What legal forms are available for Swiss companies?"
+    assertions:
+      must_call:
+        - tool: categorical_company_values
+          args:
+            field: "legal_form"
+      answer_contains:
+        - "AG"
+        - "GmbH"
+
+  - name: aggregate_by_canton
+    description: Test aggregating companies by canton
+    prompt: "Show me a breakdown of companies by Swiss canton"
+    assertions:
+      must_call:
+        - tool: aggregate_companies
+          args:
+            group_by: "Canton"
+      answer_contains:
+        - "canton"
+        - "count"
+        - "Zürich"
+
+  - name: capital_requirements
+    description: Test searching for AG companies with proper capital
+    prompt: "Find AG companies with at least 100,000 CHF capital"
+    assertions:
+      must_call:
+        - tool: search_companies
+          args:
+            legal_form: "AG"
+            min_capital: 100000
+      answer_contains:
+        - "AG"
+        - "100000"
+        - "capital"

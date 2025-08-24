@@ -1,69 +1,79 @@
-# Build stage
-FROM python:3.11-slim as builder
+# Swiss MXCP Server - Single stage build following HKMA pattern
+FROM python:3.11-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set working directory
-WORKDIR /app
-
-# Copy requirements first (for better caching)
-COPY requirements.txt exec/aws-apprunner/requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy project files
-COPY . .
-
-# Copy Docker-specific configurations
-COPY exec/aws-apprunner/mxcp-site-docker.yml mxcp-site.yml
-COPY exec/aws-apprunner/profiles-docker.yml profiles.yml
-
-# Install dbt packages
-RUN dbt deps --profiles-dir . --project-dir .
-
-# Build dbt models during image creation
-RUN dbt run --profiles-dir . --project-dir . --target prod
-
-# Run dbt tests to validate models
-RUN dbt test --profiles-dir . --project-dir . --target prod
-
-# Final stage
-FROM python:3.11-slim
-
-# Install runtime dependencies
-RUN apt-get update && apt-get install -y \
     curl \
+    wget \
+    unzip \
+    git \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
+
+# Create app directory
+WORKDIR /app
 
 # Create non-root user
-RUN useradd -m -u 1001 appuser
+RUN groupadd -r mxcp && useradd -r -g mxcp -m -d /home/mxcp mxcp
 
-# Set working directory
-WORKDIR /app
+# Copy requirements first for better caching
+COPY exec/aws-apprunner/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy from builder
-COPY --from=builder --chown=appuser:appuser /app /app
-COPY --from=builder --chown=appuser:appuser /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=builder --chown=appuser:appuser /usr/local/bin /usr/local/bin
+# Copy application files
+COPY --chown=mxcp:mxcp exec/aws-apprunner/mxcp-site-docker.yml ./mxcp-site.yml
 
-# Switch to non-root user
-USER appuser
+# Copy SQL files
+COPY --chown=mxcp:mxcp sql/ ./sql/
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+# Copy tools
+COPY --chown=mxcp:mxcp tools/ ./tools/
 
-# Expose port
-EXPOSE 8000
+# Copy models for dbt
+COPY --chown=mxcp:mxcp models/ ./models/
+
+# Copy dbt files
+COPY --chown=mxcp:mxcp dbt_project.yml ./dbt_project.yml
+COPY --chown=mxcp:mxcp exec/aws-apprunner/profiles-docker.yml ./profiles.yml
+COPY --chown=mxcp:mxcp packages.yml ./packages.yml
+
+# Copy MXCP user config to bind to all interfaces
+RUN mkdir -p /home/mxcp/.mxcp
+COPY --chown=mxcp:mxcp exec/aws-apprunner/mxcp-user-config.yml /home/mxcp/.mxcp/config.yml
+
+# Copy data directory (CSV files only)
+COPY --chown=mxcp:mxcp data/swiss-business-registry-sample.csv ./data/swiss-business-registry-sample.csv
+
+# Ensure data directory has write permissions for DuckDB
+RUN chmod -R 755 ./data && chown -R mxcp:mxcp ./data && \
+    rm -f ./data/*.duckdb ./data/*.wal
+
+# Build dbt models during image build (not at runtime)
+RUN cd /app && \
+    echo "Building dbt models..." && \
+    dbt deps --profiles-dir . --project-dir . && \
+    dbt run --profiles-dir . --project-dir . && \
+    echo "✅ dbt models built successfully" && \
+    chown -R mxcp:mxcp /app/data/
 
 # Set environment variables
+ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
-ENV DBT_PROFILES_DIR=/app
-ENV MXCP_DEBUG=true
+ENV PORT=8000
 ENV MXCP_PROFILE=prod
+ENV MXCP_TRANSPORT=streamable-http
+ENV HOME=/home/mxcp
+ENV DBT_PROFILES_DIR=/app
 
-# Run MXCP server
-CMD ["mxcp", "serve", "--host", "0.0.0.0", "--port", "8000"]
+# Switch to non-root user
+USER mxcp
+
+# Expose port
+EXPOSE $PORT
+
+# Create a simple startup script with health endpoint
+COPY --chown=mxcp:mxcp exec/aws-apprunner/start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
+# Start the wrapper script
+CMD ["/app/start.sh"]

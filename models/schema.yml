@@ -2,24 +2,91 @@ version: 2
 
 models:
   - name: swiss_companies
-    description: "Swiss business registry companies"
+    description: "Swiss business registry companies with 1,000 synthetic companies"
+    config:
+      tags: ["swiss-companies"]
+    tests:
+      # Test that we have the expected number of companies (around 1,000)
+      - dbt_utils.expression_is_true:
+          expression: "count(*) between 900 and 1100"
+          config:
+            severity: warn
     columns:
       - name: UID
         description: "Unique Identification Number"
         tests:
           - unique
           - not_null
+          # Test UID is not empty string
+          - dbt_utils.not_empty_string
       - name: CompanyName
         description: "Company name"
         tests:
           - not_null
+          - unique
+          # Test that company names are reasonable length
+          - dbt_utils.expression_is_true:
+              expression: "length(trim(CompanyName)) >= 3"
+              config:
+                severity: error
       - name: LegalForm
-        description: "Legal form"
+        description: "Legal form of the company"
         tests:
           - not_null
           - accepted_values:
-              values: ['AG', 'GmbH', 'Einzelfirma', 'Kollektivgesellschaft', 'Verein', 'Stiftung']
+              values: ['AG', 'GmbH', 'Einzelfirma', 'Kollektivgesellschaft', 'Verein', 'Stiftung', 'SA', 'LLC', 'Inc.', 'Ltd.', 'Corp.']
+              config:
+                severity: error
       - name: Canton
-        description: "Swiss canton"
+        description: "Swiss canton where company is located"
         tests:
           - not_null
+          - accepted_values:
+              values: [
+                'Zürich', 'Bern', 'Geneva', 'Basel-Stadt', 'Basel-Landschaft', 
+                'Aargau', 'St. Gallen', 'Grisons', 'Lucerne', 'Ticino',
+                'Valais', 'Vaud', 'Thurgau', 'Solothurn', 'Neuchâtel',
+                'Fribourg', 'Schaffhausen', 'Appenzell Ausserrhoden',
+                'Appenzell Innerrhoden', 'Glarus', 'Jura', 'Obwalden',
+                'Nidwalden', 'Schwyz', 'Uri', 'Zug'
+              ]
+              config:
+                severity: error
+      - name: RegistrationDate
+        description: "Date when company was registered"
+        tests:
+          - not_null
+          # Test reasonable registration date range
+          - dbt_utils.expression_is_true:
+              expression: "RegistrationDate >= '1990-01-01' and RegistrationDate <= current_date"
+              config:
+                severity: error
+      - name: ShareCapitalCHF
+        description: "Share capital in Swiss Francs"
+        tests:
+          - not_null
+          # Test reasonable share capital range
+          - dbt_utils.expression_is_true:
+              expression: "ShareCapitalCHF >= 0 and ShareCapitalCHF <= 100000000"
+              config:
+                severity: warn
+      - name: IndustryCode
+        description: "Industry classification code"
+        tests:
+          - not_null
+          # Test that industry codes are numeric strings
+          - dbt_utils.not_empty_string
+      - name: IndustryDescription
+        description: "Industry classification description"
+        tests:
+          - not_null
+          - dbt_utils.not_empty_string
+      - name: Employees
+        description: "Number of employees"
+        tests:
+          - not_null
+          # Test reasonable employee range
+          - dbt_utils.expression_is_true:
+              expression: "Employees >= 0 and Employees <= 100000"
+              config:
+                severity: warn

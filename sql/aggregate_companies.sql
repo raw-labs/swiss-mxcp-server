@@ -1,43 +1,37 @@
 WITH filtered AS (
     SELECT *
-    FROM {{ ref('swiss_companies') }}
+    FROM swiss_companies
     WHERE 1=1
-    {% if legal_form %}
-        AND LegalForm = '{{ legal_form }}'
-    {% endif %}
-    {% if canton %}
-        AND Canton = '{{ canton }}'
-    {% endif %}
-    {% if industry_code %}
-        AND IndustryCode = '{{ industry_code }}'
-    {% endif %}
-    {% if min_capital %}
-        AND ShareCapitalCHF >= {{ min_capital }}
-    {% endif %}
-    {% if max_capital %}
-        AND ShareCapitalCHF <= {{ max_capital }}
-    {% endif %}
-    {% if registration_date_from %}
-        AND RegistrationDate >= '{{ registration_date_from }}'
-    {% endif %}
-    {% if registration_date_to %}
-        AND RegistrationDate <= '{{ registration_date_to }}'
-    {% endif %}
+        AND ($legal_form IS NULL OR LegalForm = $legal_form)
+        AND ($canton IS NULL OR Canton = $canton)
+        AND ($industry_code IS NULL OR IndustryCode = $industry_code)
+        AND ($min_capital IS NULL OR ShareCapitalCHF >= $min_capital)
+        AND ($max_capital IS NULL OR ShareCapitalCHF <= $max_capital)
+        AND ($registration_date_from IS NULL OR RegistrationDate >= $registration_date_from)
+        AND ($registration_date_to IS NULL OR RegistrationDate <= $registration_date_to)
 )
 SELECT 
-    {% if group_by %}
-        {{ group_by }} as group_field,
-    {% else %}
-        'All' as group_field,
-    {% endif %}
+    CASE 
+        WHEN $group_by = 'Canton' THEN Canton
+        WHEN $group_by = 'LegalForm' THEN LegalForm
+        WHEN $group_by = 'IndustryCode' THEN CAST(IndustryCode AS VARCHAR)
+        WHEN $group_by = 'IndustryDescription' THEN IndustryDescription
+        ELSE 'All'
+    END as group_field,
     COUNT(*) as count,
     SUM(ShareCapitalCHF) as total_capital,
     AVG(ShareCapitalCHF) as avg_capital,
     SUM(Employees) as total_employees,
     AVG(Employees) as avg_employees
 FROM filtered
-{% if group_by %}
-    GROUP BY {{ group_by }}
-    ORDER BY count DESC
-{% endif %}
-LIMIT {{ page_size | default(50) }}
+WHERE ($group_by IS NULL OR $group_by IN ('Canton', 'LegalForm', 'IndustryCode', 'IndustryDescription'))
+GROUP BY 
+    CASE 
+        WHEN $group_by = 'Canton' THEN Canton
+        WHEN $group_by = 'LegalForm' THEN LegalForm
+        WHEN $group_by = 'IndustryCode' THEN CAST(IndustryCode AS VARCHAR)
+        WHEN $group_by = 'IndustryDescription' THEN IndustryDescription
+        ELSE 'All'
+    END
+ORDER BY count DESC
+LIMIT COALESCE($page_size, 50)

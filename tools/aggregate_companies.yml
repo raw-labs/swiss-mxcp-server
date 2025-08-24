@@ -5,34 +5,40 @@ tool:
   parameters:
   - name: group_by
     type: string
+    default: null
     description: Group by field (Canton, LegalForm, IndustryCode)
   - name: legal_form
     type: string
+    default: null
     description: Filter by legal form
   - name: canton
     type: string
+    default: null
     description: Filter by canton
   - name: industry_code
     type: string
+    default: null
     description: Filter by industry code
   - name: min_capital
     type: integer
+    default: null
     description: Minimum share capital filter
   - name: max_capital
     type: integer
+    default: null
     description: Maximum share capital filter
   - name: registration_date_from
     type: string
+    default: null
     description: Registration date from
   - name: registration_date_to
     type: string
+    default: null
     description: Registration date to
   - name: page_size
     type: integer
     default: 50
     description: Results per page
-  return:
-    type: array
   source:
     file: ../sql/aggregate_companies.sql
   enabled: true

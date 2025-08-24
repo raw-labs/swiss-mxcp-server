@@ -1,0 +1,74 @@
+mxcp: 1
+suite: business_analysis
+description: Business analysis scenarios using Swiss company data
+model: gpt-4.1
+tests:
+  - name: tech_companies_analysis
+    description: Analyze technology companies in Switzerland
+    prompt: "I want to analyze Swiss technology companies. Show me companies with 'Tech' in their name and tell me which cantons have the most tech companies."
+    assertions:
+      must_call:
+        - tool: search_companies
+          args:
+            company_name_like: "Tech"
+        - tool: aggregate_companies
+          args:
+            group_by: "Canton"
+      answer_contains:
+        - "technology"
+        - "canton"
+        - "companies"
+
+  - name: startup_capital_analysis
+    description: Analyze startup capital patterns
+    prompt: "What's the typical share capital for new GmbH companies? Show me GmbH companies and analyze their capital distribution."
+    assertions:
+      must_call:
+        - tool: search_companies
+          args:
+            legal_form: "GmbH"
+      answer_contains:
+        - "GmbH"
+        - "capital"
+        - "distribution"
+
+  - name: registration_trends
+    description: Analyze company registration trends over time
+    prompt: "Show me the trend of company registrations over time. Are more companies being registered in recent years?"
+    assertions:
+      must_call:
+        - tool: timeseries_companies
+          args: {}
+      answer_contains:
+        - "registration"
+        - "trend"
+        - "time"
+
+  - name: industry_diversity
+    description: Analyze industry diversity in Swiss business
+    prompt: "What industries are most common in Switzerland? Show me the industry breakdown."
+    assertions:
+      must_call:
+        - tool: categorical_company_values
+          args:
+            field: "industry_description"
+        - tool: aggregate_companies
+          args:
+            group_by: "IndustryDescription"
+      answer_contains:
+        - "industry"
+        - "common"
+        - "breakdown"
+
+  - name: large_employers
+    description: Find large employers in Switzerland
+    prompt: "Which companies have the most employees? Show me companies with over 1000 employees."
+    assertions:
+      must_call:
+        - tool: search_companies
+          args:
+            min_employees: 1000
+      answer_contains:
+        - "employees"
+        - "1000"
+        - "large"
