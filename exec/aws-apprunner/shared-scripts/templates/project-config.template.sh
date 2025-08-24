@@ -8,7 +8,7 @@
 # ========================================
 
 # AWS Configuration
-export AWS_ACCOUNT_ID="684130658470"                           # Your AWS account ID
+export AWS_ACCOUNT_ID="YOUR_AWS_ACCOUNT_ID_HERE"               # Replace with your AWS account ID
 export AWS_REGION="eu-west-1"                                  # Your deployment region
 
 # App Runner Service Configuration

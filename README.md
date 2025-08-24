@@ -3,6 +3,8 @@
 [![Tests](https://img.shields.io/badge/tests-passing-green)](#testing)
 [![Tools](https://img.shields.io/badge/tools-4-blue)](#available-tools)
 [![Data](https://img.shields.io/badge/companies-1000-brightgreen)](#data-model)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Deployment](https://img.shields.io/badge/AWS-deployed-orange)](#live-demo)
 
 A comprehensive MXCP server providing AI-powered access to Swiss business registry data. This project transforms synthetic Swiss company data into a queryable, analytics-ready API designed for the **RAW Labs MXCP** platform and seamlessly integrates with LLMs like Claude for natural language querying.
 
@@ -10,7 +12,7 @@ A comprehensive MXCP server providing AI-powered access to Swiss business regist
 
 ## 🎯 Purpose
 
-Demo project for Squirro sales representatives to showcase **MXCP (Model Context Protocol)** capabilities using Swiss business data. Perfect for demonstrating:
+Professional demonstration project showcasing **MXCP (Model Context Protocol)** capabilities using Swiss business data. Perfect for demonstrating:
 
 - **Natural Language Business Intelligence**: Query Swiss companies using plain English
 - **LLM Integration**: Built for GPT-4, Claude, and other LLMs
@@ -40,7 +42,7 @@ Demo project for Squirro sales representatives to showcase **MXCP (Model Context
 
 ### 1. Setup Environment
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/raw-labs/swiss-mxcp-server.git
 cd swiss-mxcp-server
 
 # Create and activate virtual environment
@@ -465,23 +467,47 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
+## 🌐 Live Demo
+
+**Production Service**: https://ru9grd9gq8.eu-west-1.awsapprunner.com/mcp  
+**Status**: ✅ Running  
+**Resources**: 1 vCPU, 4GB RAM  
+
+*Note: This is a live MXCP server endpoint for integration with LLM applications and Claude Desktop.*
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Run tests locally (`./scripts/run_tests.sh`)
+4. Commit your changes (`git commit -m 'Add amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
+
+---
+
 ## 🤝 Acknowledgments
 
-- **Built for**: Squirro Solutions Engineering demo purposes
-- **Powered by**: RAW Labs MXCP platform  
+- **Powered by**: [RAW Labs MXCP Platform](https://github.com/raw-labs)
 - **Data Pipeline**: dbt for data transformation
-- **Database**: DuckDB for efficient analytics
+- **Database**: DuckDB for efficient analytics  
 - **Deployment**: AWS App Runner for production hosting
-- **Testing**: Comprehensive 3-level test approach
+- **Testing**: Comprehensive 3-level validation approach
+- **Data**: Synthetic Swiss business registry data for demonstration
 
 ---
 
 ## 🆘 Support
 
-For questions about this demo:
-1. Review the test results: `./scripts/run_tests.sh`
-2. Check deployment logs: `exec/aws-apprunner/`
-3. Validate tool configurations: `mxcp validate`
-4. Test individual tools: `python tests/python/test_swiss_companies.py`
+For questions or issues:
 
-**System Status**: ✅ All tests passing, 4 tools functional, 1000 companies loaded, ready for deployment
+1. **Check Documentation**: Review this README and run `./scripts/run_tests.sh`
+2. **Validate Configuration**: Run `mxcp validate` to check tool setup
+3. **Test Locally**: Execute `python tests/python/test_swiss_companies.py`
+4. **Open Issues**: Use GitHub Issues for bugs and feature requests
+
+**Current Status**: ✅ All systems operational, comprehensive test coverage, production-ready deployment
