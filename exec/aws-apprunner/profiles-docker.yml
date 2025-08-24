@@ -1,0 +1,13 @@
+swiss_mxcp_server:
+  outputs:
+    prod:
+      type: duckdb
+      path: data/mxcp.duckdb
+      extensions:
+        - httpfs
+        - spatial
+      settings:
+        s3_region: eu-west-1
+      threads: 4
+      
+  target: prod

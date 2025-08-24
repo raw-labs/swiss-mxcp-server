@@ -1,0 +1,38 @@
+mxcp: 1
+tool:
+  name: aggregate_companies
+  description: Aggregate Swiss companies by different dimensions
+  parameters:
+  - name: group_by
+    type: string
+    description: Group by field (Canton, LegalForm, IndustryCode)
+  - name: legal_form
+    type: string
+    description: Filter by legal form
+  - name: canton
+    type: string
+    description: Filter by canton
+  - name: industry_code
+    type: string
+    description: Filter by industry code
+  - name: min_capital
+    type: integer
+    description: Minimum share capital filter
+  - name: max_capital
+    type: integer
+    description: Maximum share capital filter
+  - name: registration_date_from
+    type: string
+    description: Registration date from
+  - name: registration_date_to
+    type: string
+    description: Registration date to
+  - name: page_size
+    type: integer
+    default: 50
+    description: Results per page
+  return:
+    type: array
+  source:
+    file: ../sql/aggregate_companies.sql
+  enabled: true

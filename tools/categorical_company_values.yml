@@ -1,0 +1,13 @@
+mxcp: 1
+tool:
+  name: categorical_company_values
+  description: Get distinct values for categorical fields
+  parameters:
+  - name: field
+    type: string
+    description: Field name (legal_form, canton, industry_code, industry_description)
+  return:
+    type: array
+  source:
+    file: ../sql/categorical_company_values.sql
+  enabled: true

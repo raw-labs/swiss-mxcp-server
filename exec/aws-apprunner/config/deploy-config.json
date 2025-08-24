@@ -1,0 +1,13 @@
+{
+  "ServiceName": "swiss-mxcp-server",
+  "SourceConfiguration": {
+    "ImageRepository": {
+      "ImageIdentifier": "${ECR_IMAGE_URI}",
+      "ImageConfiguration": {
+        "Port": "8000"
+      },
+      "ImageRepositoryType": "ECR"
+    },
+    "AutoDeploymentsEnabled": false
+  }
+}

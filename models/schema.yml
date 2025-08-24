@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: swiss_companies
+    description: "Swiss business registry companies"
+    columns:
+      - name: UID
+        description: "Unique Identification Number"
+        tests:
+          - unique
+          - not_null
+      - name: CompanyName
+        description: "Company name"
+        tests:
+          - not_null
+      - name: LegalForm
+        description: "Legal form"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['AG', 'GmbH', 'Einzelfirma', 'Kollektivgesellschaft', 'Verein', 'Stiftung']
+      - name: Canton
+        description: "Swiss canton"
+        tests:
+          - not_null

@@ -1,0 +1,54 @@
+mxcp: 1
+tool:
+  name: search_companies
+  description: Search for Swiss companies in the business registry
+  parameters:
+  - name: company_name
+    type: string
+    description: Exact company name
+  - name: company_name_like
+    type: string
+    description: Company name partial match
+  - name: uid
+    type: string
+    description: Unique Identification Number
+  - name: legal_form
+    type: string
+    description: Legal form (AG, GmbH, etc.)
+  - name: canton
+    type: string
+    description: Swiss canton name
+  - name: industry_code
+    type: string
+    description: Industry code
+  - name: min_capital
+    type: integer
+    description: Minimum share capital in CHF
+  - name: max_capital
+    type: integer
+    description: Maximum share capital in CHF
+  - name: min_employees
+    type: integer
+    description: Minimum number of employees
+  - name: max_employees
+    type: integer
+    description: Maximum number of employees
+  - name: registration_date_from
+    type: string
+    description: Registration date from (YYYY-MM-DD)
+  - name: registration_date_to
+    type: string
+    description: Registration date to (YYYY-MM-DD)
+  - name: page
+    type: integer
+    default: 1
+    description: Page number
+  - name: page_size
+    type: integer
+    default: 20
+    description: Results per page
+  return:
+    type: array
+  source:
+    file: ../sql/search_companies.sql
+  enabled: true

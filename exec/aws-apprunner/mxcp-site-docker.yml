@@ -1,0 +1,11 @@
+mxcp: 1
+project: swiss-mxcp-server
+profile: prod
+dbt:
+  enabled: true
+sql_tools:
+  enabled: true
+profiles:
+  prod:
+    duckdb:
+      path: data/mxcp.duckdb
