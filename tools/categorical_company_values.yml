@@ -1,7 +1,7 @@
 mxcp: 1
 tool:
   name: categorical_company_values
-  description: Get distinct values for categorical fields
+  description: Get distinct values for categorical fields. Always use this tool to get the list of possible values for a field.
   parameters:
   - name: field
     type: string

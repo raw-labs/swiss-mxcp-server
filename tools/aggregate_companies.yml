@@ -6,7 +6,7 @@ tool:
   - name: group_by
     type: string
     default: null
-    description: Group by field (Canton, LegalForm, IndustryCode)
+    description: Comma-separated list of fields to group by (max 2). Options Canton, LegalForm, IndustryCode, IndustryDescription
   - name: legal_form
     type: string
     default: null
@@ -40,5 +40,5 @@ tool:
     default: 50
     description: Results per page
   source:
-    file: ../sql/aggregate_companies.sql
+    file: ../sql/aggregate_companies_v2.sql
   enabled: true
