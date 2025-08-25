@@ -9,3 +9,4 @@ union all
 select CompanyName, LegalForm, ShareCapitalCHF
 from {{ ref('swiss_companies') }}
 where LegalForm = 'GmbH' and ShareCapitalCHF < 20000
+

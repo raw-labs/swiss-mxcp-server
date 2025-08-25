@@ -185,3 +185,4 @@ fi
 # Export all functions for use in other scripts
 export -f validate_aws_cli validate_aws_credentials validate_docker validate_required_files
 export -f generate_timestamp get_service_status get_service_url show_config service_exists docker_cmd
+

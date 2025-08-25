@@ -99,3 +99,4 @@ echo "   • Stop container: docker stop swiss-test"
 echo "   • Remove container: docker rm swiss-test"
 echo "   • Shell access: docker exec -it swiss-test /bin/bash"
 echo ""
+

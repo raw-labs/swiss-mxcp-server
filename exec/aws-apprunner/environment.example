@@ -5,3 +5,4 @@ AWS_REGION=eu-west-1
 # Instance Configuration (optional - defaults in project-config.sh)
 CPU_SIZE="0.5 vCPU"
 MEMORY_SIZE="2 GB"
+

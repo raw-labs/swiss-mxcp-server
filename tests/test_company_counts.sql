@@ -2,3 +2,4 @@
 select count(*) as company_count
 from {{ ref('swiss_companies') }}
 having count(*) != 1000
+

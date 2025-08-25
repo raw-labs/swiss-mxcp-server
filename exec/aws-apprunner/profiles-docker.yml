@@ -11,3 +11,4 @@ swiss_mxcp_server:
       threads: 4
       
   target: prod
+

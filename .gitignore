@@ -12,6 +12,7 @@ target/
 dbt_packages/
 logs/
 *.log
+.user.yml
 
 # Data
 data/*.duckdb
@@ -40,3 +41,4 @@ htmlcov/
 # Deployment
 *.tar.gz
 *.zip
+

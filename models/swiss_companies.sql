@@ -13,3 +13,4 @@ select
     "IndustryDescription" as IndustryDescription,
     cast("Employees" as integer) as Employees
 from read_csv('data/swiss-business-registry-sample.csv', header=true, auto_detect=true)
+
