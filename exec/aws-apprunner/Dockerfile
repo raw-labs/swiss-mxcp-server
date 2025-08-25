@@ -44,9 +44,10 @@ COPY --chown=mxcp:mxcp exec/aws-apprunner/mxcp-user-config.yml /home/mxcp/.mxcp/
 # Copy data directory (CSV files only)
 COPY --chown=mxcp:mxcp data/swiss-business-registry-sample.csv ./data/swiss-business-registry-sample.csv
 
-# Ensure data directory has write permissions for DuckDB
+# Ensure data directory has write permissions for DuckDB and create logs directory
 RUN chmod -R 755 ./data && chown -R mxcp:mxcp ./data && \
-    rm -f ./data/*.duckdb ./data/*.wal
+    rm -f ./data/*.duckdb ./data/*.wal && \
+    mkdir -p ./logs && chown -R mxcp:mxcp ./logs && chmod -R 755 ./logs
 
 # Build dbt models during image build (not at runtime)
 RUN cd /app && \
@@ -64,6 +65,7 @@ ENV MXCP_PROFILE=prod
 ENV MXCP_TRANSPORT=streamable-http
 ENV HOME=/home/mxcp
 ENV DBT_PROFILES_DIR=/app
+ENV PYTHONLOGLEVEL=INFO
 
 # Switch to non-root user
 USER mxcp

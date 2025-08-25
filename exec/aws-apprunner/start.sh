@@ -4,11 +4,19 @@ set -e
 echo "Starting Swiss MXCP Server with health endpoint..."
 
 # Start MXCP server on port 8001 in the background
-mxcp serve --transport streamable-http --port 8001 --profile prod --debug &
+mxcp serve --transport streamable-http --port 8001 --profile prod &
 MXCP_PID=$!
 
 # Wait for MXCP to start
 sleep 5
+
+# Start tailing audit logs to stdout with [AUDIT] prefix
+echo "Starting audit log streaming to CloudWatch..."
+mkdir -p /app/logs
+touch /app/logs/audit.jsonl
+tail -F /app/logs/audit.jsonl 2>/dev/null | while read line; do echo "[AUDIT] $line"; done &
+AUDIT_TAIL_PID=$!
+echo "Audit log streaming started (PID: $AUDIT_TAIL_PID)"
 
 # Start a simple proxy/health server on port 8000 that:
 # - Returns 200 OK for /health requests

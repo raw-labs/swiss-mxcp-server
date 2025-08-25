@@ -9,3 +9,6 @@ profiles:
   prod:
     duckdb:
       path: data/mxcp.duckdb
+    audit:
+      enabled: true
+      path: logs/audit.jsonl
