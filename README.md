@@ -9,7 +9,8 @@ This MXCP server provides intelligent access to Swiss business registry data con
 ### Key Features
 
 - **Natural Language Queries**: Search and analyze companies using conversational language
-- **Advanced Analytics**: Aggregate data by various dimensions, create time series analyses
+- **Advanced Analytics**: Aggregate data by up to two dimensions simultaneously, create time series analyses
+- **Consistent Filtering**: All tools support the same comprehensive set of filters for unified querying
 - **Comprehensive Data Model**: Includes company details, legal forms, industries, and financial information
 - **Production-Ready**: Complete with testing, audit logging, and AWS deployment
 - **AI-Powered**: Integrates seamlessly with AI assistants like Claude, GPT-4, and others
@@ -85,42 +86,49 @@ This runs:
 
 ## Available Tools
 
+All tools support comprehensive filtering with the following parameters:
+- **company_name** / **company_name_like**: Exact or partial company name match
+- **uid**: Unique Identification Number
+- **legal_form**: Legal form (AG, GmbH, etc.)
+- **canton**: Swiss canton
+- **industry_code**: Industry classification code
+- **min_capital** / **max_capital**: Share capital range in CHF
+- **min_employees** / **max_employees**: Employee count range
+- **registration_date_from** / **registration_date_to**: Registration date range
+
 ### 1. search_companies
-Search for Swiss companies with various filters:
-- Company name (exact or partial match)
-- Canton, legal form, industry
-- Capital range, employee count
-- Registration date range
+Search for Swiss companies with pagination support.
 
 Example queries:
-- "Find all AG companies in Zürich"
-- "Show companies with more than 100 employees"
-- "List recently registered startups"
+- "Find all AG companies in Zürich with capital over 1M CHF"
+- "Show companies with 50-200 employees registered in 2024"
+- "List companies with 'Tech' in their name"
 
 ### 2. aggregate_companies
 Aggregate company data by one or two dimensions:
-- Group by: canton, legal form, industry, founding year
-- Metrics: count, average capital, total capital, average employees
+- **Group by** (comma-separated, max 2): Canton, LegalForm, IndustryCode, IndustryDescription, RegistrationYear
+- **Metrics** (comma-separated): count, total_capital, avg_share_capital, min_capital, max_capital, total_employees, avg_employees
 
 Example queries:
 - "What's the average share capital by legal form?"
-- "Show company count by canton and industry"
-- "Compare total capital across cantons"
+- "Show company count by canton and legal form" (two-level grouping)
+- "Compare total capital by industry for Zürich companies"
+- "Group by canton,legalform and show count and average capital"
 
 ### 3. timeseries_companies
 Analyze trends over time:
-- Date fields: registration date, founding date
-- Intervals: day, week, month, quarter, year
-- Metrics: count, averages, totals
+- **date_field**: Currently supports RegistrationDate
+- **interval**: day, week, month, quarter, year
+- Supports all standard filters
 
 Example queries:
-- "Show monthly company registrations"
-- "Track founding trends by year"
-- "Analyze quarterly growth patterns"
+- "Show monthly company registrations for AG companies"
+- "Track quarterly registrations with capital > 500K"
+- "Analyze yearly growth patterns by canton"
 
 ### 4. categorical_company_values
 Get distinct values for categorical fields:
-- Available fields: canton, legal_form, industry_code, industry_description
+- **field**: canton, legal_form, industry_code, industry_description
 
 Example queries:
 - "List all Swiss cantons in the data"
@@ -235,6 +243,14 @@ The project includes complete AWS App Runner deployment:
 Required for deployment:
 - `OPENAI_API_KEY` - For AI features (optional for basic testing)
 - AWS credentials for deployment
+
+## Recent Improvements
+
+- **Two-Level Grouping**: aggregate_companies now supports grouping by two dimensions (e.g., Canton,LegalForm)
+- **Consistent Filtering**: All tools now support the same comprehensive set of filters
+- **Enhanced Time Series**: Added support for day, week, quarter intervals in addition to month and year
+- **Improved SQL Structure**: Queries follow clean, maintainable patterns similar to UAE MXCP server
+- **Better Testing**: Added specific tests for two-level grouping and comprehensive filter validation
 
 ## Contributing
 
