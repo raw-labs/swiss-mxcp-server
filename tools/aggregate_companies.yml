@@ -40,5 +40,5 @@ tool:
     default: 50
     description: Results per page
   source:
-    file: ../sql/aggregate_companies_v2.sql
+    file: ../sql/aggregate_companies.sql
   enabled: true
