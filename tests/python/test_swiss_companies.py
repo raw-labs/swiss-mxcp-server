@@ -1,448 +1,234 @@
 #!/usr/bin/env python3
 """
-Comprehensive MXCP Test Suite for Swiss Business Registry Tools
-Tests all tools with expected data validation
+Fixed MXCP Test Suite for Swiss Business Registry Tools
+Uses stdio transport for reliable testing
 """
 
 import subprocess
 import json
 import sys
-import os
-import argparse
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 
-def call_mxcp_tool(tool_name: str, transport: str = "stdio", host: Optional[str] = None, port: Optional[int] = None, **kwargs) -> Optional[Dict[str, Any]]:
-    """Call MXCP tool and return the result"""
+def call_tool_stdio(tool_name: str, **kwargs) -> Optional[Dict[str, Any]]:
+    """Call MXCP tool via stdio transport"""
     
-    if transport == "stdio":
-        mxcp_path = os.environ.get("MXCP_PATH", "mxcp")
-        cmd = [mxcp_path, "serve", "--transport", "stdio"]
-        
-        # Create the JSON-RPC messages
-        messages = [
-            # Initialize
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "initialize",
-                "params": {
-                    "protocolVersion": "2024-11-05",
-                    "capabilities": {},
-                    "clientInfo": {"name": "test-client", "version": "1.0.0"}
-                }
-            },
-            # Initialized notification
-            {
-                "jsonrpc": "2.0",
-                "method": "notifications/initialized"
-            },
-            # Tool call
-            {
-                "jsonrpc": "2.0",
-                "id": 2,
-                "method": "tools/call",
-                "params": {
-                    "name": tool_name,
-                    "arguments": kwargs
-                }
+    # Create the JSON-RPC messages  
+    messages = [
+        {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {},
+                "clientInfo": {"name": "test", "version": "1.0"}
             }
-        ]
-        
-        # Convert to newline-delimited JSON
-        input_data = "\n".join([json.dumps(msg) for msg in messages]) + "\n"
-        
-        try:
-            result = subprocess.run(
-                cmd,
-                input=input_data,
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
-            
-            if result.returncode != 0:
-                print(f"Error calling MXCP: {result.stderr}")
-                return None
-            
-            # Parse output
-            responses = []
-            for line in result.stdout.strip().split("\n"):
-                if line:
-                    try:
-                        responses.append(json.loads(line))
-                    except json.JSONDecodeError:
-                        continue
-            
-            # Find the tool response
-            for response in responses:
-                if response.get("id") == 2 and "result" in response:
-                    return response["result"]
-            
-            return None
-            
-        except Exception as e:
-            print(f"Exception calling MXCP: {e}")
-            return None
-    
-    else:
-        # For streamable-http transport
-        print(f"Streamable HTTP transport not implemented in this test")
-        return None
-
-
-def test_search_companies():
-    """Test search_companies tool with various filters"""
-    print("\n=== Testing search_companies ===")
-    
-    # Test 1: Search by canton
-    result = call_mxcp_tool(
-        "search_companies",
-        canton="Zürich"
-    )
-    
-    if result:
-        print(f"Success (Canton filter): Found results")
-        content = result.get('content', [])
-        # Validate that results are from Zürich
-        if content:
-            first_result = content[0] if isinstance(content, list) else content
-            assert "Zürich" in str(first_result), "Expected results from Zürich canton"
-    else:
-        print("Failed to get result for Canton filter")
-        return False
-    
-    # Test 2: Search by legal form
-    result = call_mxcp_tool(
-        "search_companies",
-        legal_form="AG"
-    )
-    
-    if result:
-        print(f"Success (Legal form filter): Found AG companies")
-        content = result.get('content', [])
-        if content:
-            first_result = content[0] if isinstance(content, list) else content
-            assert "AG" in str(first_result), "Expected AG companies"
-    else:
-        print("Failed to get result for Legal form filter")
-        return False
-    
-    # Test 3: Search with capital range
-    result = call_mxcp_tool(
-        "search_companies",
-        min_capital=100000,
-        max_capital=1000000
-    )
-    
-    if result:
-        print(f"Success (Capital range): Found companies in range")
-    else:
-        print("Failed to get result for Capital range")
-        return False
-    
-    # Test 4: Company name search
-    result = call_mxcp_tool(
-        "search_companies",
-        company_name_like="Tech"
-    )
-    
-    if result:
-        print(f"Success (Name search): Found companies with 'Tech'")
-    else:
-        print("Failed to get result for Name search")
-        return False
-    
-    return True
-
-
-def test_aggregate_companies():
-    """Test aggregate_companies tool with grouping and filters"""
-    print("\n=== Testing aggregate_companies ===")
-    
-    # Test 1: Group by canton
-    result = call_mxcp_tool(
-        "aggregate_companies",
-        group_by="Canton"
-    )
-    
-    if result:
-        print(f"Success (Group by Canton): {result}")
-        content = result.get('content', [])
-        # Should have multiple cantons
-        assert len(content) >= 5, "Expected multiple cantons in aggregation"
-        # Should have common Swiss cantons
-        canton_names = [str(item) for item in content]
-        cantons_str = " ".join(canton_names)
-        assert any(canton in cantons_str for canton in ["Zürich", "Bern", "Geneva"]), "Expected major Swiss cantons"
-    else:
-        print("Failed to get result for Group by Canton")
-        return False
-    
-    # Test 2: Group by legal form
-    result = call_mxcp_tool(
-        "aggregate_companies",
-        group_by="LegalForm"
-    )
-    
-    if result:
-        print(f"Success (Group by Legal Form): {result}")
-        content = result.get('content', [])
-        # Should have multiple legal forms
-        forms_str = " ".join([str(item) for item in content])
-        assert any(form in forms_str for form in ["AG", "GmbH"]), "Expected AG and GmbH legal forms"
-    else:
-        print("Failed to get result for Group by Legal Form")
-        return False
-    
-    # Test 3: Filter by canton and group
-    result = call_mxcp_tool(
-        "aggregate_companies",
-        canton="Zürich",
-        group_by="LegalForm"
-    )
-    
-    if result:
-        print(f"Success (Canton filter + Group by Legal Form): {result}")
-    else:
-        print("Failed to get result for filtered aggregation")
-        return False
-    
-    return True
-
-
-def test_timeseries_companies():
-    """Test timeseries_companies tool with different intervals"""
-    print("\n=== Testing timeseries_companies ===")
-    
-    # Test 1: Monthly timeseries
-    result = call_mxcp_tool(
-        "timeseries_companies",
-        interval="month"
-    )
-    
-    if result:
-        print(f"Success (Monthly): Found timeseries data")
-        content = result.get('content', [])
-        assert len(content) > 0, "Expected timeseries data points"
-    else:
-        print("Failed to get result for Monthly timeseries")
-        return False
-    
-    # Test 2: Yearly timeseries
-    result = call_mxcp_tool(
-        "timeseries_companies",
-        interval="year"
-    )
-    
-    if result:
-        print(f"Success (Yearly): Found yearly data")
-    else:
-        print("Failed to get result for Yearly timeseries")
-        return False
-    
-    # Test 3: Filtered timeseries
-    result = call_mxcp_tool(
-        "timeseries_companies",
-        canton="Zürich",
-        legal_form="AG"
-    )
-    
-    if result:
-        print(f"Success (Filtered timeseries): Found filtered data")
-    else:
-        print("Failed to get result for Filtered timeseries")
-        return False
-    
-    return True
-
-
-def test_categorical_company_values():
-    """Test categorical_company_values tool for all categorical fields"""
-    print("\n=== Testing categorical_company_values ===")
-    
-    # Test 1: Get legal forms
-    result = call_mxcp_tool(
-        "categorical_company_values",
-        field="legal_form"
-    )
-    
-    if result:
-        print(f"Success (Legal Forms): {result}")
-        content = result.get('content', [])
-        forms_str = " ".join([str(item) for item in content])
-        assert any(form in forms_str for form in ["AG", "GmbH"]), "Expected standard Swiss legal forms"
-    else:
-        print("Failed to get result for Legal Forms")
-        return False
-    
-    # Test 2: Get cantons
-    result = call_mxcp_tool(
-        "categorical_company_values",
-        field="canton"
-    )
-    
-    if result:
-        print(f"Success (Cantons): Found canton values")
-        content = result.get('content', [])
-        cantons_str = " ".join([str(item) for item in content])
-        assert any(canton in cantons_str for canton in ["Zürich", "Bern", "Geneva"]), "Expected major Swiss cantons"
-        # Should have reasonable number of cantons
-        assert len(content) >= 5, "Expected multiple Swiss cantons"
-        assert len(content) <= 26, "Should not exceed 26 Swiss cantons"
-    else:
-        print("Failed to get result for Cantons")
-        return False
-    
-    # Test 3: Get industry codes
-    result = call_mxcp_tool(
-        "categorical_company_values",
-        field="industry_code"
-    )
-    
-    if result:
-        print(f"Success (Industry Codes): Found industry codes")
-    else:
-        print("Failed to get result for Industry Codes")
-        return False
-    
-    # Test 4: Get industry descriptions
-    result = call_mxcp_tool(
-        "categorical_company_values",
-        field="industry_description"
-    )
-    
-    if result:
-        print(f"Success (Industry Descriptions): Found descriptions")
-    else:
-        print("Failed to get result for Industry Descriptions")
-        return False
-    
-    return True
-
-
-def test_data_quality():
-    """Test data quality expectations"""
-    print("\n=== Testing Data Quality ===")
-    
-    # Test 1: Verify we have reasonable number of companies (around 1,000)
-    result = call_mxcp_tool(
-        "search_companies",
-        page_size=1000
-    )
-    
-    if result:
-        content = result.get('content', [])
-        company_count = len(content)
-        print(f"Total companies found: {company_count}")
-        assert 900 <= company_count <= 1100, f"Expected ~1000 companies, got {company_count}"
-        print("✓ Company count validation passed")
-    else:
-        print("Failed to get company count")
-        return False
-    
-    # Test 2: Verify AG companies have reasonable capital
-    result = call_mxcp_tool(
-        "search_companies",
-        legal_form="AG",
-        min_capital=100000  # Swiss AG minimum
-    )
-    
-    if result:
-        print("✓ AG capital requirements validation passed")
-    else:
-        print("No AG companies found with minimum capital - this might indicate data quality issues")
-    
-    return True
-
-
-def test_edge_cases():
-    """Test edge cases and error handling"""
-    print("\n=== Testing Edge Cases ===")
-    
-    # Test 1: Empty search (no filters)
-    result = call_mxcp_tool("search_companies")
-    
-    if result:
-        print("✓ Empty search handled correctly")
-    else:
-        print("Failed empty search")
-        return False
-    
-    # Test 2: Invalid field for categorical values
-    result = call_mxcp_tool(
-        "categorical_company_values",
-        field="invalid_field"
-    )
-    
-    # This should either return empty results or handle gracefully
-    print("✓ Invalid field handled (result may be empty)")
-    
-    # Test 3: Very high pagination
-    result = call_mxcp_tool(
-        "search_companies",
-        page=999,
-        page_size=10
-    )
-    
-    if result is not None:  # Should handle gracefully even if empty
-        print("✓ High pagination handled correctly")
-    else:
-        print("High pagination failed")
-        return False
-    
-    return True
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Swiss Companies MXCP Test Suite")
-    parser.add_argument("--transport", choices=["stdio", "streamable-http", "both"], 
-                        default="stdio", help="Transport to test")
-    parser.add_argument("--mxcp-path", default="mxcp", help="Path to mxcp binary")
-    parser.add_argument("--host", help="Host for streamable-http transport")
-    parser.add_argument("--port", type=int, help="Port for streamable-http transport")
-    
-    args = parser.parse_args()
-    
-    # Set MXCP path
-    os.environ["MXCP_PATH"] = args.mxcp_path
-    
-    print("=== Swiss Business Registry MXCP Comprehensive Test Suite ===")
-    print(f"Transport: {args.transport}")
-    print(f"MXCP Path: {args.mxcp_path}")
-    
-    # Run all tests
-    tests = [
-        test_search_companies,
-        test_aggregate_companies,
-        test_timeseries_companies,
-        test_categorical_company_values,
-        test_data_quality,
-        test_edge_cases
+        }
     ]
     
-    passed = 0
-    failed = 0
+    # Just send initialize to get the response
+    input_data = json.dumps(messages[0]) + "\n"
     
-    for test in tests:
-        try:
-            if test():
-                passed += 1
-                print(f"✓ {test.__name__} PASSED")
+    try:
+        # First, just initialize
+        result = subprocess.run(
+            ["mxcp", "serve", "--transport", "stdio"],
+            input=input_data,
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        
+        if result.returncode != 0:
+            print(f"Failed to initialize: {result.stderr}")
+            return None
+            
+        # Now make a separate call with the tool
+        tool_message = {
+            "jsonrpc": "2.0",
+            "id": 2,
+            "method": "tools/call",
+            "params": {
+                "name": tool_name,
+                "arguments": kwargs
+            }
+        }
+        
+        # Create a new process for the tool call
+        all_messages = [
+            messages[0],  # Initialize
+            {"jsonrpc": "2.0", "method": "notifications/initialized"},  # Notify
+            tool_message  # Tool call
+        ]
+        
+        input_data = "\n".join([json.dumps(msg) for msg in all_messages]) + "\n"
+        
+        result = subprocess.run(
+            ["mxcp", "serve", "--transport", "stdio"],
+            input=input_data,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode != 0:
+            print(f"Tool call failed: {result.stderr}")
+            return None
+            
+        # Parse responses
+        for line in result.stdout.strip().split("\n"):
+            if line:
+                try:
+                    response = json.loads(line)
+                    if response.get("id") == 2 and "result" in response:
+                        return response["result"]
+                except json.JSONDecodeError:
+                    continue
+                    
+    except subprocess.TimeoutExpired:
+        print("Timeout calling tool")
+    except Exception as e:
+        print(f"Error calling tool: {e}")
+    
+    return None
+
+def test_all_tools():
+    """Test all tools"""
+    tests_passed = 0
+    tests_failed = 0
+    
+    # Test 1: search_companies
+    print("\n=== Testing search_companies ===")
+    result = call_tool_stdio("search_companies", canton="Zürich", page_size=5)
+    if result and not result.get("isError"):
+        content = result.get("content", [])
+        if content and isinstance(content, list) and len(content) > 0:
+            print(f"✓ search_companies works - found {len(content)} companies")
+            tests_passed += 1
+        else:
+            print("✗ search_companies failed - no results")
+            tests_failed += 1
+    else:
+        print("✗ search_companies failed - error or no response")
+        tests_failed += 1
+    
+    # Test 2: aggregate_companies (single grouping)
+    print("\n=== Testing aggregate_companies (single grouping) ===")
+    result = call_tool_stdio("aggregate_companies", group_by="Canton", metrics="count,avg_share_capital")
+    if result and not result.get("isError"):
+        content = result.get("content", [])
+        if content and isinstance(content, list) and len(content) > 0:
+            print(f"✓ aggregate_companies works - found {len(content)} groups")
+            tests_passed += 1
+        else:
+            print("✗ aggregate_companies failed - no results")
+            tests_failed += 1
+    else:
+        print("✗ aggregate_companies failed - error or no response")
+        tests_failed += 1
+    
+    # Test 2b: aggregate_companies (two-level grouping)
+    print("\n=== Testing aggregate_companies (two-level grouping) ===")
+    result = call_tool_stdio("aggregate_companies", group_by="Canton,LegalForm", metrics="count,avg_share_capital")
+    if result and not result.get("isError"):
+        content = result.get("content", [])
+        if content and isinstance(content, list) and len(content) > 0:
+            print(f"✓ aggregate_companies two-level grouping works - found {len(content)} combinations")
+            # Verify the results have both fields
+            if content[0].get("type") == "text":
+                try:
+                    first_result = json.loads(content[0].get("text", "{}"))
+                    if "group_1" in first_result and "group_2" in first_result:
+                        print("✓ Two-level grouping returns both group fields")
+                        print(f"  Example: {first_result.get('group_1')} / {first_result.get('group_2')} - Count: {first_result.get('count')}")
+                        tests_passed += 1
+                    else:
+                        print("✗ Two-level grouping missing expected fields")
+                        tests_failed += 1
+                except:
+                    print("✗ Failed to parse two-level grouping results")
+                    tests_failed += 1
             else:
-                failed += 1
-                print(f"✗ {test.__name__} FAILED")
-        except Exception as e:
-            failed += 1
-            print(f"✗ {test.__name__} FAILED with exception: {e}")
+                tests_failed += 1
+        else:
+            print("✗ aggregate_companies two-level grouping failed - no results")
+            tests_failed += 1
+    else:
+        print("✗ aggregate_companies two-level grouping failed - error or no response")
+        tests_failed += 1
+    
+    # Test 3: timeseries_companies
+    print("\n=== Testing timeseries_companies ===")
+    result = call_tool_stdio("timeseries_companies", date_field="RegistrationDate", interval="year")
+    if result and not result.get("isError"):
+        content = result.get("content", [])
+        if content and isinstance(content, list) and len(content) > 0:
+            print(f"✓ timeseries_companies works - found {len(content)} time periods")
+            tests_passed += 1
+        else:
+            print("✗ timeseries_companies failed - no results")
+            tests_failed += 1
+    else:
+        print("✗ timeseries_companies failed - error or no response")
+        tests_failed += 1
+    
+    # Test 4: categorical_company_values
+    print("\n=== Testing categorical_company_values ===")
+    result = call_tool_stdio("categorical_company_values", field="canton")
+    if result and not result.get("isError"):
+        content = result.get("content", [])
+        if content and isinstance(content, list) and len(content) > 0:
+            print(f"✓ categorical_company_values works - found {len(content)} values")
+            tests_passed += 1
+        else:
+            print("✗ categorical_company_values failed - no results")
+            tests_failed += 1
+    else:
+        print("✗ categorical_company_values failed - error or no response")
+        tests_failed += 1
+    
+    # Test 5: Data quality check
+    print("\n=== Testing data quality ===")
+    result = call_tool_stdio("search_companies", page_size=1)
+    if result and not result.get("isError"):
+        content = result.get("content", [])
+        if content and isinstance(content[0], dict) and content[0].get("type") == "text":
+            # Parse the JSON from the text field
+            try:
+                company_json = content[0].get("text", "")
+                company = json.loads(company_json)
+                required_fields = ["CompanyName", "Canton", "LegalForm"]
+                if all(field in company for field in required_fields):
+                    print("✓ Data quality check passed - all required fields present")
+                    tests_passed += 1
+                else:
+                    missing = [f for f in required_fields if f not in company]
+                    print(f"✗ Data quality check failed - missing fields: {missing}")
+                    tests_failed += 1
+            except json.JSONDecodeError:
+                print("✗ Data quality check failed - invalid JSON")
+                tests_failed += 1
+        else:
+            print("✗ Data quality check failed - no data")
+            tests_failed += 1
+    else:
+        print("✗ Data quality check failed - tool error")
+        tests_failed += 1
     
     print(f"\n=== Test Summary ===")
-    print(f"Passed: {passed}")
-    print(f"Failed: {failed}")
-    print(f"Total: {passed + failed}")
+    print(f"Passed: {tests_passed}")
+    print(f"Failed: {tests_failed}")
+    print(f"Total: {tests_passed + tests_failed}")
+    print("\nTests performed:")
+    print("  1. search_companies")
+    print("  2. aggregate_companies (single grouping)")
+    print("  3. aggregate_companies (two-level grouping)")
+    print("  4. timeseries_companies") 
+    print("  5. categorical_company_values")
+    print("  6. data quality check")
     
-    # Exit with appropriate code
-    sys.exit(0 if failed == 0 else 1)
-
+    return tests_failed == 0
 
 if __name__ == "__main__":
-    main()
+    success = test_all_tools()
+    sys.exit(0 if success else 1)

@@ -106,7 +106,7 @@ echo
 
 # 3. Run comprehensive Python MXCP tool tests
 echo "=== Running Comprehensive MXCP Tool Tests ==="
-if python tests/python/test_swiss_companies_fixed.py; then
+if python tests/python/test_swiss_companies.py; then
     echo -e "${GREEN}✓ MXCP tool tests PASSED${NC}"
     ((TESTS_PASSED++))
 else

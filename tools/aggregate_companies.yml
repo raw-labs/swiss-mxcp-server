@@ -6,7 +6,23 @@ tool:
   - name: group_by
     type: string
     default: null
-    description: Comma-separated list of fields to group by (max 2). Options Canton, LegalForm, IndustryCode, IndustryDescription
+    description: Comma-separated list of fields to group by (max 2). Options Canton, LegalForm, IndustryCode, IndustryDescription, RegistrationYear
+  - name: metrics
+    type: string
+    default: "count"
+    description: Comma-separated list of metrics to calculate. Options count, total_capital, avg_share_capital, min_capital, max_capital, total_employees, avg_employees
+  - name: company_name
+    type: string
+    default: null
+    description: Exact company name
+  - name: company_name_like
+    type: string
+    default: null
+    description: Company name partial match
+  - name: uid
+    type: string
+    default: null
+    description: Unique Identification Number
   - name: legal_form
     type: string
     default: null
@@ -27,6 +43,14 @@ tool:
     type: integer
     default: null
     description: Maximum share capital filter
+  - name: min_employees
+    type: integer
+    default: null
+    description: Minimum number of employees
+  - name: max_employees
+    type: integer
+    default: null
+    description: Maximum number of employees
   - name: registration_date_from
     type: string
     default: null

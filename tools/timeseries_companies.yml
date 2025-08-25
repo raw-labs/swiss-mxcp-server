@@ -3,10 +3,26 @@ tool:
   name: timeseries_companies
   description: Analyze Swiss company registrations over time
   parameters:
+  - name: date_field
+    type: string
+    default: RegistrationDate
+    description: Date field to analyze (currently only RegistrationDate is supported)
   - name: interval
     type: string
     default: month
-    description: Time interval (month or year)
+    description: Time interval (day, week, month, quarter, year)
+  - name: company_name
+    type: string
+    default: null
+    description: Exact company name
+  - name: company_name_like
+    type: string
+    default: null
+    description: Company name partial match
+  - name: uid
+    type: string
+    default: null
+    description: Unique Identification Number
   - name: legal_form
     type: string
     default: null
@@ -19,14 +35,30 @@ tool:
     type: string
     default: null
     description: Filter by industry code
+  - name: min_capital
+    type: integer
+    default: null
+    description: Minimum share capital in CHF
+  - name: max_capital
+    type: integer
+    default: null
+    description: Maximum share capital in CHF
+  - name: min_employees
+    type: integer
+    default: null
+    description: Minimum number of employees
+  - name: max_employees
+    type: integer
+    default: null
+    description: Maximum number of employees
   - name: registration_date_from
     type: string
     default: null
-    description: Registration date from
+    description: Registration date from (YYYY-MM-DD)
   - name: registration_date_to
     type: string
     default: null
-    description: Registration date to
+    description: Registration date to (YYYY-MM-DD)
   - name: page_size
     type: integer
     default: 100
