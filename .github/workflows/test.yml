@@ -36,6 +36,7 @@ jobs:
     - name: Run all tests
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        CI: true
       run: |
         # Make test script executable
         chmod +x scripts/run_tests.sh

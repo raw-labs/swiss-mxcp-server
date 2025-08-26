@@ -59,6 +59,7 @@ jobs:
     - name: Run tests
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        CI: true
       run: |
         chmod +x scripts/run_tests.sh
         ./scripts/run_tests.sh

@@ -18,8 +18,8 @@ NC='\033[0m' # No Color
 TESTS_PASSED=0
 TESTS_FAILED=0
 
-# Check if virtual environment is activated
-if [[ "$VIRTUAL_ENV" == "" ]]; then
+# Check if virtual environment is activated (skip in CI environments)
+if [[ "$VIRTUAL_ENV" == "" ]] && [[ "$CI" != "true" ]]; then
     echo -e "${YELLOW}⚠️  Virtual environment not detected. Attempting to activate...${NC}"
     if [[ -f "venv/bin/activate" ]]; then
         source venv/bin/activate
@@ -28,6 +28,8 @@ if [[ "$VIRTUAL_ENV" == "" ]]; then
         echo -e "${RED}✗ Virtual environment not found. Please run: python3 -m venv venv && source venv/bin/activate${NC}"
         exit 1
     fi
+elif [[ "$CI" == "true" ]]; then
+    echo -e "${GREEN}✓ Running in CI environment - virtual environment check skipped${NC}"
 fi
 
 # Check if OPENAI_API_KEY is set (required for MXCP tools)
