@@ -2,7 +2,7 @@ name: Deploy to AWS App Runner
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch:
     inputs:
       environment:
