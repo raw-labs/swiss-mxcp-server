@@ -203,7 +203,7 @@ fi
 if [[ "$CI" == "true" ]]; then
     # In CI, we require at least 3 passing tests (out of typically 4 that run)
     if [ $TESTS_PASSED -ge 3 ]; then
-        echo -e "${GREEN}CI tests passed (${TESTS_PASSED}/${TESTS_PASSED + TESTS_FAILED})!${NC}"
+        echo -e "${GREEN}CI tests passed (${TESTS_PASSED}/$((TESTS_PASSED + TESTS_FAILED)))!${NC}"
         exit 0
     else
         echo -e "${RED}Too few tests passed in CI environment!${NC}"
