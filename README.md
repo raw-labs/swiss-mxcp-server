@@ -159,7 +159,7 @@ All tool calls are automatically logged with:
 
 View audit logs:
 ```bash
-./scripts/latest-logs.sh --audit
+./exec/aws-apprunner/shared-scripts/scripts/latest-logs.sh --audit
 ```
 
 ### Data Quality

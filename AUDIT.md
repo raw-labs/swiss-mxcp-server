@@ -65,31 +65,35 @@ In the deployed App Runner service, audit logs are:
 
 This project includes scripts to easily view and parse audit logs:
 
-### `scripts/latest-logs.sh`
+### Audit Log Scripts
+
+The audit log scripts are available in the shared-scripts submodule:
+
+#### `latest-logs.sh`
 
 Automatically finds the latest App Runner log group and displays logs:
 
 ```bash
 # Tail all logs in real-time
-./scripts/latest-logs.sh
+./exec/aws-apprunner/shared-scripts/scripts/latest-logs.sh
 
 # Show only audit logs (raw format)
-./scripts/latest-logs.sh --audit
+./exec/aws-apprunner/shared-scripts/scripts/latest-logs.sh --audit
 
 # Show audit logs with pretty formatting
-./scripts/latest-logs.sh --audit --format
+./exec/aws-apprunner/shared-scripts/scripts/latest-logs.sh --audit --format
 
 # Show audit logs from last 2 hours
-./scripts/latest-logs.sh --audit --time-window=2h --format
+./exec/aws-apprunner/shared-scripts/scripts/latest-logs.sh --audit --time-window=2h --format
 ```
 
-### `scripts/parse-audit-logs.py`
+#### `parse-audit-logs.py`
 
 Python script that properly parses MXCP's audit log format (handles malformed JSON):
 
 ```bash
 # Pipe audit logs through the parser
-aws logs tail <log-group> | grep AUDIT | python3 scripts/parse-audit-logs.py
+aws logs tail <log-group> | grep AUDIT | python3 exec/aws-apprunner/shared-scripts/scripts/parse-audit-logs.py
 ```
 
 ### Example Formatted Output

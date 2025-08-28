@@ -69,7 +69,7 @@ Test the deployed service:
 View audit logs:
 ```bash
 # From project root
-./scripts/latest-logs.sh --audit
+./shared-scripts/scripts/latest-logs.sh --audit
 ```
 
 ## Troubleshooting

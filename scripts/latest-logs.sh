@@ -1,1 +1,0 @@
-../exec/aws-apprunner/shared-scripts/scripts/latest-logs.sh

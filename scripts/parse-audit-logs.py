@@ -1,1 +1,0 @@
-../exec/aws-apprunner/shared-scripts/scripts/parse-audit-logs.py
