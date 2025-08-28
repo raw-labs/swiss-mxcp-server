@@ -17,6 +17,7 @@ This directory contains everything needed to deploy the Swiss Business Registry 
 ## Quick Start
 
 1. Copy and configure environment:
+
    ```bash
    cp environment.example .env
    # Edit .env and set AWS_ACCOUNT_ID
