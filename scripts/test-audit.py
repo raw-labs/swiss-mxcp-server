@@ -65,4 +65,4 @@ for req in test_requests:
     print()
 
 print("✅ Test complete! Check audit logs with:")
-print("   ./scripts/latest-logs.sh --audit --format")
+print("   ./exec/aws-apprunner/shared-scripts/scripts/latest-logs.sh --audit --format")

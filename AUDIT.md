@@ -111,7 +111,7 @@ To monitor the service in production:
 
 1. **Use the helper script** (recommended):
    ```bash
-   ./scripts/latest-logs.sh --audit --format
+   ./exec/aws-apprunner/shared-scripts/scripts/latest-logs.sh --audit --format
    ```
 
 2. **Direct AWS CLI commands**:
