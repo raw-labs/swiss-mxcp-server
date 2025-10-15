@@ -1,7 +1,7 @@
 # Core dependencies
-mxcp>=0.5.0
+mxcp>=0.8.1
 dbt-duckdb==1.8.3
-duckdb==1.0.0
+duckdb==1.4.1
 
 # Additional dependencies
 pandas>=2.0.0
