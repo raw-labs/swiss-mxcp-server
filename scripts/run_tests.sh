@@ -40,18 +40,7 @@ fi
 
 echo
 
-# 1. Run MXCP validation
-echo "=== Testing MXCP Configuration Validation ==="
-if mxcp validate; then
-    echo -e "${GREEN}✓ MXCP validation PASSED${NC}"
-    ((TESTS_PASSED++))
-else
-    echo -e "${RED}✗ MXCP validation FAILED${NC}"
-    ((TESTS_FAILED++))
-fi
-echo
-
-# 2. Build dbt models and run tests
+# 1. Build dbt models and run tests
 echo "=== Running dbt Data Pipeline and Quality Tests ==="
 
 # First install dbt dependencies
@@ -102,6 +91,17 @@ if [ "$DBT_FAILED" -le 10 ] && [ "$DBT_PASSED" -ge 10 ]; then
     ((TESTS_PASSED++))
 else
     echo -e "${RED}✗ dbt tests FAILED${NC}"
+    ((TESTS_FAILED++))
+fi
+echo
+
+# 2. Run MXCP validation
+echo "=== Testing MXCP Configuration Validation ==="
+if mxcp validate; then
+    echo -e "${GREEN}✓ MXCP validation PASSED${NC}"
+    ((TESTS_PASSED++))
+else
+    echo -e "${RED}✗ MXCP validation FAILED${NC}"
     ((TESTS_FAILED++))
 fi
 echo
