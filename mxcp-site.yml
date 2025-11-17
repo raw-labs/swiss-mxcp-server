@@ -1,5 +1,5 @@
 mxcp: 1
-project: swiss-mxcp-server
+project: mxcp-docker
 profile: prod
 dbt:
   enabled: true

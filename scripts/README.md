@@ -23,7 +23,6 @@ This script generates realistic synthetic Swiss business registry data that matc
 
 ```bash
 # Generate 1000 companies with current date as the latest registration
-cd /Users/alexzerntev/workspace/swiss-mxcp-server
 python3 scripts/generate_swiss_companies.py
 ```
 

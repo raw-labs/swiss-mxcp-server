@@ -1,56 +1,25 @@
-name: Tests
+name: Test
 
 on:
   pull_request:
-    branches: [ master, develop ]
-  workflow_dispatch:
-    inputs:
-      debug:
-        description: 'Enable debug logging'
-        required: false
-        default: 'false'
+  push:
+    branches: [main]
 
 jobs:
-  test:
+  test-mxcp:
+    name: Test MXCP Server
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: recursive
-        token: ${{ secrets.GH_PAT }}
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r exec/aws-apprunner/requirements.txt
-        # Install additional dependencies for evals
-        pip install openai tiktoken
-    
-    - name: Run all tests
-      env:
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        CI: true
-      run: |
-        # Make test script executable
-        chmod +x scripts/run_tests.sh
-        
-        # Run comprehensive test suite
-        ./scripts/run_tests.sh
-    
-    - name: Upload test results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results
-        path: |
-          target/
-          logs/
-          *.log
-        retention-days: 7
+      - uses: actions/checkout@v4
+      
+      - name: Build Docker image
+        run: |
+          docker build -t swiss-mxcp-server:test .
+      
+      - name: Validate MXCP server
+        run: |
+          docker run --rm swiss-mxcp-server:test mxcp validate
+      
+      - name: Test MXCP server
+        run: |
+          docker run --rm swiss-mxcp-server:test mxcp test

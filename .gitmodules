@@ -1,3 +1,0 @@
-[submodule "exec/aws-apprunner/shared-scripts"]
-	path = exec/aws-apprunner/shared-scripts
-	url = https://github.com/raw-labs/mxcp-deployment-scripts.git

@@ -1,0 +1,28 @@
+# Git
+.git
+.gitignore
+
+# GitHub Actions
+.github
+
+# Development
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+*.egg-info
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+
+# Documentation
+*.md
+!README.md
+
+# Database source files (only need built data/db-default.duckdb)
+database/
