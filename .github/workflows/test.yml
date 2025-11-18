@@ -16,6 +16,10 @@ jobs:
         run: |
           docker build -t swiss-mxcp-server:test .
       
+      - name: Test DBT
+        run: |
+          docker run --rm swiss-mxcp-server:test dbt test
+
       - name: Validate MXCP server
         run: |
           docker run --rm swiss-mxcp-server:test mxcp validate
